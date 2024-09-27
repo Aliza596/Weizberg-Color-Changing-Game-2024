@@ -1,28 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Pane?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 
-<VBox alignment="CENTER" spacing="20.0" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.dsiigame.HelloController">
+<VBox alignment="CENTER" spacing="20.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.dsiigame.HelloController">
   <padding>
     <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
   </padding>
    <HBox fx:id="labelBox" prefHeight="190.0" prefWidth="252.0" visible="false">
       <children>
          <Label fx:id="colorLabel" prefHeight="189.0" prefWidth="314.0" style="-fx-background-color: red" />
-         <Label fx:id="scoreLabel" prefHeight="66.0" prefWidth="72.0" text="Score:" textAlignment="CENTER" />
+         <Label fx:id="scoreLabel" prefHeight="66.0" prefWidth="124.0" text="Score:" textAlignment="CENTER" />
       </children>
    </HBox>
   <Button fx:id="startButton" onAction="#onStartButtonClick" prefHeight="83.0" prefWidth="148.0" text="Start Game!" />
 
    <Pane fx:id="buttonBox" prefHeight="209.0" prefWidth="388.0" visible="true">
       <children>
-         <Button fx:id="button1" layoutX="-1.0" layoutY="-2.0" mnemonicParsing="false" prefHeight="53.0" prefWidth="80.0" visible="false"/>
-         <Button fx:id="button2" layoutY="51.0" mnemonicParsing="false" prefHeight="53.0" prefWidth="80.0" visible="false"/>
+         <Button fx:id="button1" layoutX="-1.0" layoutY="-2.0" mnemonicParsing="false" prefHeight="53.0" prefWidth="80.0" visible="false" />
+         <Button fx:id="button2" layoutY="51.0" mnemonicParsing="false" prefHeight="53.0" prefWidth="80.0" visible="false" />
          <Button fx:id="button3" layoutX="-1.0" layoutY="104.0" mnemonicParsing="false" prefHeight="53.0" prefWidth="80.0" visible="false" />
          <Button fx:id="button4" layoutY="157.0" mnemonicParsing="false" prefHeight="53.0" prefWidth="80.0" visible="false" />
          <Button fx:id="button5" layoutX="79.0" layoutY="-2.0" mnemonicParsing="false" prefHeight="53.0" prefWidth="80.0" visible="false" />

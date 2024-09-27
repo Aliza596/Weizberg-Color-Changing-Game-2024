@@ -136,8 +136,15 @@ public class HelloController {
 
     public void correctButtonClicked(int points) {
         playSound(correctSound);
-        score += points;
-        scoreLabel.setText("Score:\n" + score);
+        int bonusPoints = random.nextInt(10);
+        if (bonusPoints <= 3) {
+            score += (points + 5);
+            scoreLabel.setText("5 Bonus Points!!\nScore:\n" + score);
+        } else {
+            score += points;
+            scoreLabel.setText("Score:\n" + score);
+        }
+
 
 
         // Makes the game harder if these are commented out
