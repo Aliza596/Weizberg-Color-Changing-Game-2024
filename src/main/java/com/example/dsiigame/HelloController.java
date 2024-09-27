@@ -1,7 +1,6 @@
 package com.example.dsiigame;
 
 import javafx.animation.KeyFrame;
-import javafx.animation.PauseTransition;
 import javafx.animation.Timeline;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -9,16 +8,19 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Button;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 import javafx.util.Duration;
-
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.UnsupportedAudioFileException;
+import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Random;
 
 public class HelloController {
-    @FXML
-    private Label welcomeText;
-    public javafx.scene.control.Button Button;
-
     @FXML
     private Button startButton;
     @FXML
@@ -29,80 +31,33 @@ public class HelloController {
     private HBox labelBox;
     @FXML
     private Pane buttonBox;
-    @FXML
-//    private Button button1;
-//    @FXML
-//    private Button button2;
-//    @FXML
-//    private Button button3;
-//    @FXML
-//    private Button button4;
-//    @FXML
-//    private Button button5;
-//    @FXML
-//    private Button button6;
-//    @FXML
-//    private Button button7;
-//    @FXML
-//    private Button button8;
-//    @FXML
-//    private Button button9;
-//    @FXML
-//    private Button button10;
-//    @FXML
-//    private Button button11;
-//    @FXML
-//    private Button button12;
-//    @FXML
-//    private Button button13;
-//    @FXML
-//    private Button button14;
-//    @FXML
-//    private Button button15;
-//    @FXML
-//    private Button button16;
-//    @FXML
-//    private Button button17;
-//    @FXML
-//    private Button button18;
-//    @FXML
-//    private Button button19;
-//    @FXML
-//    private Button button20;
-    Button[] buttonsArray = new Button[20];
     Random random = new Random();
+    Timeline buttonTimeline;
     String colorOfLabel;
     String newColor;
-    String colorUpTo;
     ArrayList<Integer> spotsTaken = new ArrayList<>();
     int randInt;
-
     int score;
+    private Clip correctSound;
+    private Clip incorrectSound;
+    private int buttonBoxSound;
 
     private String[] colorsToLoopThrough = {"-fx-background-color: red", "-fx-background-color: green",
             "-fx-background-color: blue", "-fx-background-color: yellow", "-fx-background-color: pink"};
 
+
+    public HelloController() {
+        try {
+            correctSound = loadSound("/correctAnswerSound.wav");
+            incorrectSound = loadSound("/wrongAnswerSound.wav");
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+    }
     @FXML
     protected void onStartButtonClick(ActionEvent event) {
         startButton.setVisible(false);
-
         changingColor();
-//
-//        Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(5), e -> changingColor()));
-//        timeline.setCycleCount(Timeline.INDEFINITE);
-//        timeline.play();
-
-//        for (int i = 0; i < buttonBoxSize; i++) {
-//            buttonsArray[i] = (Button)buttonBox.getChildren().get(i);
-//        }
-//
-//
-//        for (int i = 0; i < 4; i++) {
-//            int randInt = random.nextInt(buttonBoxSize - 1);
-//            buttonsArray[randInt].setVisible(true);
-//            buttonsArray[randInt].setStyle(colorUpTo);
-//        }
-
     }
 
     public void changingColor() {
@@ -126,64 +81,115 @@ public class HelloController {
 
             Button currentButton = (Button) buttonBox.getChildren().get(randInt);
 
+            double randTime = random.nextDouble(1.5, 3);
+            int points = calculateScore(randTime);
+
             currentButton.setVisible(true);
             currentButton.setStyle(newColor);
-
-            int randTime = random.nextInt(4) + 1;
-
-            if (i == 0) {
-                currentButton.setOnAction(e -> correctButtonClicked());
+            currentButton.setText(Integer.toString(points));
+            if (newColor == "-fx-background-color: yellow" || newColor == "-fx-background-color: pink")
+            {
+                currentButton.setTextFill(Color.BLACK);
             } else {
-                currentButton.setOnAction(e -> inCorrectButtonClicked());
+                currentButton.setTextFill(Color.WHITE);
             }
 
-            Timeline buttonTimeline = new Timeline(new KeyFrame(Duration.seconds(randTime), e -> {
+            if (i == 0) {
+                currentButton.setOnAction(e -> correctButtonClicked(points));
+            } else {
+                currentButton.setOnAction(e -> inCorrectButtonClicked(points));
+            }
+
+            buttonTimeline = new Timeline(new KeyFrame(Duration.seconds(randTime), e -> {
                 currentButton.setVisible(false);
                 currentButton.setStyle("");
             }));
             buttonTimeline.setCycleCount(1);
             buttonTimeline.play();
 
-//            PauseTransition pause = new PauseTransition(Duration.seconds(randTime));
-//            pause.setOnFinished(e -> {
-//                currentButton.setVisible(false);
-//                currentButton.setStyle("");
-//            });
-//
-//            pause.play();
-
             do {
                 newColor = colorsToLoopThrough[random.nextInt(5)];
             } while (newColor.equals(colorOfLabel));
         }
 
+
+        if (score >= 50) {
+            winGame(true, buttonTimeline);
+        } else if (score <= -50) {
+            winGame(false, buttonTimeline);
+        }
+
         Timeline resetRound = new Timeline(new KeyFrame(Duration.seconds(5), e -> {
-            allButtonsInvisible(buttonBoxSize);
+            allButtonsInvisible();
             changingColor();
         }));
         resetRound.setCycleCount(1);
         resetRound.play();
-
-//        PauseTransition resetRound = new PauseTransition(Duration.seconds(5));
-//        resetRound.setOnFinished(e -> allButtonsInvisible(buttonBoxSize));
-//        resetRound.play();
     }
 
-    public void allButtonsInvisible(int size) {
-        for (int i = 0; i < size; i++) {
+    public void allButtonsInvisible() {
+        for (int i = 0; i < buttonBox.getChildren().size(); i++) {
             buttonBox.getChildren().get(i).setVisible(false);
             buttonBox.getChildren().get(i).setStyle("");
         }
     }
 
-    public void correctButtonClicked() {
-        score += 10;
+    public void correctButtonClicked(int points) {
+        playSound(correctSound);
+        score += points;
+        scoreLabel.setText("Score:\n" + score);
+
+
+        // Makes the game harder if these are commented out
+//        allButtonsInvisible();
+//        changingColor();
+    }
+
+    public void inCorrectButtonClicked(int points) {
+        playSound(incorrectSound);
+        score -= points;
         scoreLabel.setText("Score:\n" + score);
     }
 
-    public void inCorrectButtonClicked() {
-        score -= 10;
-        scoreLabel.setText("Score:\n" + score);
+    private void playSound(Clip sound) {
+        if (sound.isRunning()) {
+            sound.stop();
+        }
+        sound.setFramePosition(0);
+        sound.start();
+    }
+
+    private Clip loadSound(String file) throws UnsupportedAudioFileException, IOException, LineUnavailableException {
+        URL soundURL = getClass().getResource(file);
+        AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(soundURL);
+        Clip clip = AudioSystem.getClip();
+        clip.open(audioInputStream);
+        return clip;
+    }
+
+    public int calculateScore(double time) {
+        int points;
+        if (time < 2) {
+            points = 3;
+        } else if (time < 2.5) {
+            points = 2;
+        } else {
+            points = 1;
+        }
+        return points;
+    }
+
+    public void winGame(boolean bool, Timeline buttonTimeline) {
+        allButtonsInvisible();
+        colorLabel.setVisible(false);
+        startButton.setVisible(true);
+        scoreLabel.setVisible(false);
+        if (bool) {
+            startButton.setText("Congrats!\nYou Win!!!");
+        } else {
+            startButton.setText("Game Over ;(");
+        }
+        buttonTimeline.stop();
     }
 
 
